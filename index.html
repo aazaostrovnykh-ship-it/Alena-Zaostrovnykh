@@ -1,575 +1,367 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Генератор визиток — высокое разрешение</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            padding: 30px 20px;
-        }
-        .app {
-            max-width: 1400px;
-            width: 100%;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            padding: 30px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-        }
-        .controls {
-            flex: 1 1 340px;
-            min-width: 280px;
-        }
-        .preview-area {
-            flex: 2 1 500px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 16px;
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-        }
-        h2 {
-            font-size: 16px;
-            margin: 18px 0 8px;
-            color: #34495e;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 4px;
-        }
-        .field { margin-bottom: 12px; }
-        label {
-            display: block;
-            font-weight: 600;
-            font-size: 13px;
-            color: #34495e;
-            margin-bottom: 2px;
-        }
-        input, select, textarea {
-            width: 100%;
-            padding: 8px 10px;
-            border: 1px solid #dce1e8;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: 0.2s;
-            font-family: inherit;
-        }
-        textarea { resize: vertical; min-height: 50px; }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
-        }
-        .color-row {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-        .color-row input[type="color"] {
-            width: 50px;
-            height: 40px;
-            padding: 2px;
-            border-radius: 6px;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-        .color-row input[type="text"] {
-            flex: 1;
-        }
-        .file-upload {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .file-upload input[type="file"] {
-            width: auto;
-            padding: 5px;
-        }
-        .file-upload button {
-            padding: 6px 14px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .file-upload button:hover { background: #c0392b; }
-        .font-size-row {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 4px;
-        }
-        .font-size-row .fs-item {
-            flex: 1;
-            min-width: 80px;
-        }
-        .font-size-row .fs-item label {
-            font-weight: 400;
-            font-size: 12px;
-            color: #555;
-            margin-bottom: 0;
-        }
-        .font-size-row .fs-item input {
-            width: 100%;
-            padding: 6px;
-            font-size: 13px;
-        }
-        .dpi-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .dpi-row input[type="range"] {
-            flex: 1;
-            margin: 0;
-        }
-        .dpi-row span {
-            min-width: 60px;
-            font-weight: bold;
-        }
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-        }
-        button {
-            padding: 10px 22px;
-            border: none;
-            border-radius: 30px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.15s;
-        }
-        button:hover { transform: scale(1.02); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .btn-primary { background: #3498db; color: white; }
-        .btn-success { background: #2ecc71; color: white; }
-        .btn-success:disabled { background: #b0b0b0; cursor: not-allowed; transform: none; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Заостровных Алена — менеджер по развитию</title>
+<style>
+  :root {
+    --beige: #f3e9d8;
+    --beige-soft: #faf3e6;
+    --beige-deep: #e8d9c1;
+    --brown: #5c4033;
+    --brown-soft: #7a5c47;
+    --brown-deep: #3e2a1e;
+    --gold: #b08d57;
+  }
 
-        .card-wrapper {
-            background: #e9ecf0;
-            padding: 25px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            min-height: 320px;
-        }
-        #card {
-            width: 420px;
-            height: 240px;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            position: relative;
-            overflow: hidden;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-size: cover;
-            background-position: center;
-        }
-        /* Шаблоны – структура */
-        #card .template-classic {
-            padding: 20px;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        #card .template-classic .top {
-            text-align: center;
-            font-weight: bold;
-            letter-spacing: 1px;
-            border-bottom: 1px solid;
-            padding-bottom: 6px;
-        }
-        #card .template-classic .middle {
-            text-align: center;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        #card .template-classic .name { font-weight: 700; }
-        #card .template-classic .position { font-weight: 700; }
-        #card .template-classic .bottom {
-            text-align: center;
-            border-top: 1px solid;
-            padding-top: 8px;
-        }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        #card .template-modern {
-            height: 100%;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-        #card .template-modern .company { font-weight: 600; letter-spacing: 2px; text-transform: uppercase; opacity: 0.9; }
-        #card .template-modern .name { font-weight: 700; }
-        #card .template-modern .position { font-weight: 700; opacity: 0.9; }
-        #card .template-modern .contacts {
-            opacity: 0.85;
-            border-top: 1px solid;
-            padding-top: 10px;
-            width: 80%;
-        }
+  html { scroll-behavior: smooth; }
 
-        #card .template-minimal {
-            height: 100%;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-        }
-        #card .template-minimal .left-line {
-            position: absolute;
-            left: 30px;
-            top: 20%;
-            bottom: 20%;
-            width: 3px;
-        }
-        #card .template-minimal .content { margin-left: 50px; }
-        #card .template-minimal .name { font-weight: 700; }
-        #card .template-minimal .position { font-weight: 700; }
-        #card .template-minimal .company { font-style: italic; }
-        #card .template-minimal .contacts {
-            border-top: 1px solid;
-            padding-top: 8px;
-        }
-        #card .template-minimal .right-corner {
-            position: absolute;
-            right: 20px;
-            bottom: 20px;
-            font-size: 10px;
-            letter-spacing: 3px;
-            writing-mode: vertical-rl;
-        }
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: radial-gradient(circle at 20% 10%, #fbf6ec 0%, var(--beige) 45%, var(--beige-deep) 100%);
+    color: var(--brown);
+    min-height: 100vh;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
 
-        .hint { font-size: 13px; color: #7f8c8d; margin-top: 8px; }
-        @media (max-width: 700px) {
-            .app { flex-direction: column; padding: 20px; }
-            #card { width: 100%; height: auto; aspect-ratio: 420 / 240; }
-            .card-wrapper { padding: 15px; }
-            .font-size-row { flex-direction: column; }
-        }
-    </style>
+  /* декоративный фон */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle at 85% 85%, rgba(176,141,87,0.10) 0%, transparent 45%),
+      radial-gradient(circle at 5% 60%, rgba(176,141,87,0.08) 0%, transparent 40%);
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+  }
+
+  /* ─────────── HERO ─────────── */
+  .hero {
+    text-align: center;
+    padding: 30px 10px 20px;
+    animation: fadeUp 1s ease both;
+  }
+
+  .hero .ornament {
+    font-size: 26px;
+    letter-spacing: 12px;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+
+  .hero h1 {
+    font-size: clamp(30px, 5.5vw, 52px);
+    font-weight: 400;
+    color: var(--brown-deep);
+    letter-spacing: 1px;
+    line-height: 1.2;
+  }
+
+  .hero h1 span {
+    display: block;
+    font-style: italic;
+    color: var(--gold);
+    font-size: 0.5em;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-top: 14px;
+  }
+
+  .divider {
+    width: 140px;
+    height: 1px;
+    margin: 34px auto;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    position: relative;
+  }
+  .divider::after {
+    content: "✦";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--gold);
+    background: var(--beige);
+    padding: 0 10px;
+    font-size: 14px;
+  }
+
+  /* ─────────── ABOUT ─────────── */
+  .about {
+    background: rgba(255, 252, 246, 0.55);
+    border: 1px solid rgba(176,141,87,0.35);
+    border-radius: 22px;
+    padding: 38px 40px;
+    margin: 20px 0 50px;
+    box-shadow: 0 10px 40px -18px rgba(92,64,51,0.35);
+    backdrop-filter: blur(2px);
+    animation: fadeUp 1.1s ease both;
+  }
+
+  .about p {
+    font-size: 18px;
+    margin-bottom: 16px;
+    color: var(--brown-soft);
+  }
+  .about p:last-child { margin-bottom: 0; }
+
+  .about strong { color: var(--brown-deep); font-weight: 700; }
+
+  .directions {
+    display: grid;
+    gap: 14px;
+    margin-top: 22px;
+  }
+  .direction {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 17px;
+    color: var(--brown-soft);
+  }
+  .direction .dot {
+    flex: 0 0 auto;
+    color: var(--gold);
+    font-size: 20px;
+    line-height: 1.2;
+  }
+
+  /* ─────────── SECTION TITLE ─────────── */
+  .section-title {
+    text-align: center;
+    font-size: clamp(22px, 3.5vw, 30px);
+    font-weight: 400;
+    color: var(--brown-deep);
+    letter-spacing: 1px;
+    margin-bottom: 30px;
+    font-style: italic;
+  }
+
+  /* ─────────── BUTTONS ─────────── */
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 26px;
+    justify-content: center;
+    margin-bottom: 60px;
+  }
+
+  .heart-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 40px;
+    font-family: inherit;
+    font-size: 19px;
+    letter-spacing: 1px;
+    color: #fdf8ef;
+    text-decoration: none;
+    background: linear-gradient(145deg, #7a5c47, #5c4033);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), box-shadow 0.35s ease;
+    box-shadow: 0 8px 22px -10px rgba(62,42,30,0.7), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+
+  .heart-btn:hover {
+    transform: scale(1.12);
+    box-shadow: 0 14px 32px -10px rgba(62,42,30,0.75), inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+  .heart-btn:active { transform: scale(1.05); }
+
+  .heart-btn .heart {
+    display: inline-block;
+    font-size: 22px;
+    color: #f7c9c9;
+    animation: beat 1.3s ease-in-out infinite;
+    transform-origin: center;
+  }
+  .heart-btn:hover .heart { color: #ffdada; }
+
+  @keyframes beat {
+    0%, 100% { transform: scale(1); }
+    15%      { transform: scale(1.25); }
+    30%      { transform: scale(1); }
+    45%      { transform: scale(1.18); }
+    60%      { transform: scale(1); }
+  }
+
+  /* ─────────── CONTACTS ─────────── */
+  .contacts {
+    background: rgba(255, 252, 246, 0.6);
+    border: 1px solid rgba(176,141,87,0.35);
+    border-radius: 22px;
+    padding: 40px 40px;
+    text-align: center;
+    box-shadow: 0 10px 40px -18px rgba(92,64,51,0.35);
+    backdrop-filter: blur(2px);
+  }
+
+  .contact-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    justify-content: center;
+    margin-top: 26px;
+  }
+
+  .contact-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 26px;
+    text-decoration: none;
+    color: var(--brown-deep);
+    background: var(--beige-soft);
+    border: 1px solid rgba(176,141,87,0.5);
+    border-radius: 14px;
+    font-size: 17px;
+    transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 14px -8px rgba(92,64,51,0.4);
+  }
+  .contact-card:hover {
+    transform: translateY(-4px) scale(1.04);
+    background: #fffdf8;
+    box-shadow: 0 10px 24px -10px rgba(92,64,51,0.5);
+  }
+  .contact-card .ico {
+    font-size: 20px;
+    line-height: 1;
+    color: var(--gold);
+  }
+
+  .phone-big {
+    display: inline-block;
+    font-size: clamp(22px, 4vw, 30px);
+    letter-spacing: 2px;
+    color: var(--brown-deep);
+    text-decoration: none;
+    margin-top: 6px;
+    transition: color 0.3s ease;
+  }
+  .phone-big:hover { color: var(--gold); }
+
+  .footnote {
+    margin-top: 34px;
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 14px;
+    color: rgba(92,64,51,0.55);
+    letter-spacing: 1px;
+  }
+  footer .heart { color: #c98b8b; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 560px) {
+    .wrap { padding: 40px 16px 60px; }
+    .about, .contacts { padding: 28px 22px; }
+    .heart-btn { padding: 16px 30px; font-size: 17px; width: 100%; justify-content: center; }
+    .buttons { gap: 18px; }
+  }
+</style>
 </head>
 <body>
-<div class="app">
-    <div class="controls">
-        <h1>📇 Генератор визиток (HD)</h1>
+  <div class="wrap">
 
-        <div class="field"><label>Имя</label><input type="text" id="name" value="Иван Петров"></div>
-        <div class="field"><label>Должность</label><input type="text" id="position" value="Главный инженер"></div>
-        <div class="field"><label>Компания (можно в несколько строк)</label><textarea id="company" rows="3">ООО «ТехноСтрой»</textarea></div>
-        <div class="field"><label>Телефон</label><input type="text" id="phone" value="+7 (912) 345-67-89"></div>
-        <div class="field"><label>E-mail (оставьте пустым, если не нужен)</label><input type="text" id="email" value="i.petrov@techstroi.ru"></div>
+    <!-- HERO -->
+    <header class="hero">
+      <div class="ornament">✦ ✦ ✦</div>
+      <h1>
+        Заостровных Алена
+        <span>Менеджер по развитию</span>
+      </h1>
+    </header>
 
-        <h2>Размер шрифта (px)</h2>
-        <div class="font-size-row">
-            <div class="fs-item"><label>Имя</label><input type="number" id="fontSizeName" value="20" min="8" max="60"></div>
-            <div class="fs-item"><label>Должность</label><input type="number" id="fontSizePosition" value="14" min="8" max="60"></div>
-            <div class="fs-item"><label>Компания</label><input type="number" id="fontSizeCompany" value="12" min="8" max="60"></div>
-            <div class="fs-item"><label>Телефон</label><input type="number" id="fontSizePhone" value="11" min="8" max="60"></div>
-        </div>
+    <div class="divider"></div>
 
-        <h2>Шаблон</h2>
-        <select id="template">
-            <option value="classic">Классический</option>
-            <option value="modern" selected>Современный</option>
-            <option value="minimal">Минималистичный</option>
-        </select>
+    <!-- ABOUT -->
+    <section class="about">
+      <p>
+        Здравствуйте! Меня зовут <strong>Алена Заостровных</strong>. Я работаю менеджером
+        по развитию в <strong>типографии Екатеринбургской Епархии</strong>.
+      </p>
+      <p>
+        Мы трудимся на нужды Церкви и одновременно открыты для светских заказчиков —
+        для нас важно, чтобы дело было сделано с душой и заботой о каждой детали.
+      </p>
+      <p>В моей работе два основных направления:</p>
+      <div class="directions">
+        <div class="direction">
+          <span class="dot">✦</span>
+          <span><strong>Типография</strong> — печать офсетных тиражей: книжная, журнальная,
+          бланковая и другая полиграфия любого объёма.</span>
+        </div>
+        <div class="direction">
+          <span class="dot">✦</span>
+          <span><strong>Детские сказки</strong> — трогательные и красивые истории для самых
+          маленьких читателей и их родителей.</span>
+        </div>
+      </div>
+    </section>
 
-        <h2>Цвета</h2>
-        <div class="field">
-            <label>Цвет фона</label>
-            <div class="color-row">
-                <input type="color" id="bgColor" value="#ffffff">
-                <input type="text" id="bgColorText" value="#ffffff">
-            </div>
-        </div>
-        <div class="field">
-            <label>Цвет текста (основной)</label>
-            <div class="color-row">
-                <input type="color" id="textColor" value="#000000">
-                <input type="text" id="textColorText" value="#000000">
-            </div>
-        </div>
-        <div class="field">
-            <label>Акцентный цвет (линии, рамки)</label>
-            <div class="color-row">
-                <input type="color" id="accentColor" value="#cccccc">
-                <input type="text" id="accentColorText" value="#cccccc">
-            </div>
-        </div>
-
-        <h2>Фоновое изображение</h2>
-        <div class="field">
-            <label>URL картинки (оставьте пустым для цвета)</label>
-            <input type="text" id="bgImageUrl" placeholder="https://example.com/background.jpg">
-        </div>
-        <div class="field file-upload">
-            <label>Или загрузите с компьютера:</label>
-            <input type="file" id="bgFileInput" accept="image/*">
-            <button id="clearBgBtn">✕ Очистить фон</button>
-        </div>
-
-        <h2>Качество (DPI)</h2>
-        <div class="field">
-            <div class="dpi-row">
-                <input type="range" id="dpiSlider" min="72" max="1200" value="600" step="10">
-                <span id="dpiLabel">600</span>
-            </div>
-            <div class="hint">Рекомендуется 300–600 DPI для печати.</div>
-        </div>
-
-        <div class="btn-group">
-            <button class="btn-primary" id="updateBtn">🔄 Обновить</button>
-            <button class="btn-success" id="downloadBtn">⬇ Скачать PNG</button>
-        </div>
-        <div class="hint">Все изменения применяются автоматически.</div>
+    <!-- BUTTONS -->
+    <h2 class="section-title">Познакомиться с направлениями</h2>
+    <div class="buttons">
+      <a class="heart-btn" href="http://print-games.ru/" target="_blank" rel="noopener">
+        <span class="heart">❤</span> Типография
+      </a>
+      <a class="heart-btn" href="http://tales.print-games.ru/" target="_blank" rel="noopener">
+        <span class="heart">❤</span> Сказки
+      </a>
     </div>
 
-    <div class="preview-area">
-        <div class="card-wrapper">
-            <div id="card"></div>
-        </div>
-        <div style="font-size: 14px; color: #7f8c8d;">Предпросмотр (увеличен для наглядности)</div>
-    </div>
-</div>
+    <!-- CONTACTS -->
+    <section class="contacts">
+      <h2 class="section-title" style="margin-bottom: 8px;">Связаться со мной</h2>
+      <a class="phone-big" href="tel:+79960320581">8 (996) 032-05-81</a>
 
-<script>
-    (function() {
-        // Элементы
-        const nameInput = document.getElementById('name');
-        const positionInput = document.getElementById('position');
-        const companyInput = document.getElementById('company');
-        const phoneInput = document.getElementById('phone');
-        const emailInput = document.getElementById('email');
-        const templateSelect = document.getElementById('template');
+      <div class="contact-list">
+        <a class="contact-card" href="tel:+79960320581">
+          <span class="ico">📞</span> Позвонить
+        </a>
+        <a class="contact-card"
+           href="https://max.ru/u/f9LHodD0cOJm0scZmw8ljIgY4XvzUfQkAZim_yoPycj2Vt-GSl4U0L-AM6w"
+           target="_blank" rel="noopener">
+          <span class="ico">💬</span> Мессенджер MAX
+        </a>
+        <a class="contact-card" href="https://vk.ru/id1107348249" target="_blank" rel="noopener">
+          <span class="ico">🕊</span> ВКонтакте
+        </a>
+      </div>
 
-        const fontSizeName = document.getElementById('fontSizeName');
-        const fontSizePosition = document.getElementById('fontSizePosition');
-        const fontSizeCompany = document.getElementById('fontSizeCompany');
-        const fontSizePhone = document.getElementById('fontSizePhone');
+      <div class="footnote">Я пользуюсь мессенджером MAX — присоединяйтесь!</div>
+    </section>
 
-        const bgColorInput = document.getElementById('bgColor');
-        const bgColorText = document.getElementById('bgColorText');
-        const textColorInput = document.getElementById('textColor');
-        const textColorText = document.getElementById('textColorText');
-        const accentColorInput = document.getElementById('accentColor');
-        const accentColorText = document.getElementById('accentColorText');
-        const bgImageUrlInput = document.getElementById('bgImageUrl');
-        const bgFileInput = document.getElementById('bgFileInput');
-        const clearBgBtn = document.getElementById('clearBgBtn');
+    <footer>
+      Сделано с <span class="heart">♥</span> — Заостровных Алена
+    </footer>
 
-        const dpiSlider = document.getElementById('dpiSlider');
-        const dpiLabel = document.getElementById('dpiLabel');
-
-        const cardContainer = document.getElementById('card');
-        const updateBtn = document.getElementById('updateBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
-
-        // Синхронизация цветов
-        function syncColorInputs(colorInput, textInput) {
-            colorInput.addEventListener('input', function() { textInput.value = this.value; renderCard(); });
-            textInput.addEventListener('input', function() { colorInput.value = this.value; renderCard(); });
-        }
-        syncColorInputs(bgColorInput, bgColorText);
-        syncColorInputs(textColorInput, textColorText);
-        syncColorInputs(accentColorInput, accentColorText);
-
-        // DPI слайдер
-        dpiSlider.addEventListener('input', function() {
-            dpiLabel.textContent = this.value;
-        });
-
-        // Загрузка фона
-        bgFileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-                bgImageUrlInput.value = ev.target.result;
-                renderCard();
-            };
-            reader.readAsDataURL(file);
-        });
-
-        clearBgBtn.addEventListener('click', function() {
-            bgImageUrlInput.value = '';
-            bgFileInput.value = '';
-            renderCard();
-        });
-
-        // Рендеринг визитки
-        function renderCard() {
-            const name = nameInput.value.trim() || 'Имя';
-            const position = positionInput.value.trim() || 'Должность';
-            const company = companyInput.value.trim() || '';
-            const phone = phoneInput.value.trim() || 'Телефон';
-            const email = emailInput.value.trim() || '';
-            const template = templateSelect.value;
-
-            const bgColor = bgColorInput.value || '#ffffff';
-            const textColor = textColorInput.value || '#000000';
-            const accentColor = accentColorInput.value || '#cccccc';
-            const bgImage = bgImageUrlInput.value.trim();
-
-            const fName = parseInt(fontSizeName.value) || 20;
-            const fPosition = parseInt(fontSizePosition.value) || 14;
-            const fCompany = parseInt(fontSizeCompany.value) || 12;
-            const fPhone = parseInt(fontSizePhone.value) || 11;
-
-            let contactsHtml = '';
-            if (email) {
-                contactsHtml = `${phone} &nbsp;|&nbsp; ${email}`;
-            } else {
-                contactsHtml = `${phone}`;
-            }
-
-            let innerHtml = '';
-            if (template === 'classic') {
-                innerHtml = `
-                    <div class="template-classic" style="color:${textColor};">
-                        <div class="top" style="border-bottom-color:${accentColor}; font-size:${fCompany}px;">${company}</div>
-                        <div class="middle">
-                            <div class="position" style="font-size:${fPosition}px; font-weight:700;">${position}</div>
-                            <div class="name" style="font-size:${fName}px; font-weight:700;">${name}</div>
-                        </div>
-                        <div class="bottom" style="border-top-color:${accentColor}; font-size:${fPhone}px;">${contactsHtml}</div>
-                    </div>
-                `;
-            } else if (template === 'modern') {
-                innerHtml = `
-                    <div class="template-modern" style="color:${textColor};">
-                        <div class="company" style="font-size:${fCompany}px; color:${textColor};">${company}</div>
-                        <div class="position" style="font-size:${fPosition}px; font-weight:700;">${position}</div>
-                        <div class="name" style="font-size:${fName}px; font-weight:700;">${name}</div>
-                        <div class="contacts" style="border-top-color:${accentColor}; font-size:${fPhone}px;">${contactsHtml}</div>
-                    </div>
-                `;
-            } else if (template === 'minimal') {
-                innerHtml = `
-                    <div class="template-minimal" style="color:${textColor};">
-                        <div class="left-line" style="background-color:${accentColor};"></div>
-                        <div class="content">
-                            <div class="position" style="font-size:${fPosition}px; font-weight:700;">${position}</div>
-                            <div class="name" style="font-size:${fName}px; font-weight:700;">${name}</div>
-                            ${company ? `<div class="company" style="font-size:${fCompany}px; color:${accentColor};">${company}</div>` : ''}
-                            <div class="contacts" style="border-top-color:${accentColor}; font-size:${fPhone}px;">${contactsHtml}</div>
-                        </div>
-                        <div class="right-corner" style="color:${accentColor};">ВИЗИТКА</div>
-                    </div>
-                `;
-            }
-
-            cardContainer.innerHTML = innerHtml;
-
-            if (bgImage) {
-                cardContainer.style.backgroundImage = `url('${bgImage}')`;
-                cardContainer.style.backgroundSize = 'cover';
-                cardContainer.style.backgroundPosition = 'center';
-                cardContainer.style.backgroundColor = 'transparent';
-            } else {
-                cardContainer.style.backgroundImage = 'none';
-                cardContainer.style.backgroundColor = bgColor;
-            }
-        }
-
-        // Автообновление
-        function autoUpdate() { renderCard(); }
-
-        nameInput.addEventListener('input', autoUpdate);
-        positionInput.addEventListener('input', autoUpdate);
-        companyInput.addEventListener('input', autoUpdate);
-        phoneInput.addEventListener('input', autoUpdate);
-        emailInput.addEventListener('input', autoUpdate);
-        templateSelect.addEventListener('change', autoUpdate);
-        fontSizeName.addEventListener('input', autoUpdate);
-        fontSizePosition.addEventListener('input', autoUpdate);
-        fontSizeCompany.addEventListener('input', autoUpdate);
-        fontSizePhone.addEventListener('input', autoUpdate);
-        bgColorInput.addEventListener('input', autoUpdate);
-        bgColorText.addEventListener('input', autoUpdate);
-        textColorInput.addEventListener('input', autoUpdate);
-        textColorText.addEventListener('input', autoUpdate);
-        accentColorInput.addEventListener('input', autoUpdate);
-        accentColorText.addEventListener('input', autoUpdate);
-        bgImageUrlInput.addEventListener('input', autoUpdate);
-        dpiSlider.addEventListener('input', autoUpdate); // перерисовка не нужна, но пусть будет
-
-        updateBtn.addEventListener('click', autoUpdate);
-
-        // Скачивание с высоким DPI
-        downloadBtn.addEventListener('click', function() {
-            const dpi = parseInt(dpiSlider.value) || 300;
-            // Расчёт масштаба: берём базовый размер 420x240 пикселей, умножаем на коэффициент.
-            // При 600 DPI и размере визитки 90x50 мм нужно ~2126x1181 пикселей.
-            // Поэтому scale = dpi / 72 (так как html2canvas работает в пикселях экрана, 72 DPI стандарт)
-            // Но на практике лучше использовать эмпирический коэффициент.
-            // Для удобства возьмём scale = dpi / 72, но ограничим разумным пределом.
-            let scale = dpi / 72;
-            // Ограничим scale до 10 (чтобы не перегружать память)
-            if (scale > 10) scale = 10;
-            if (scale < 1) scale = 1;
-
-            downloadBtn.disabled = true;
-            downloadBtn.textContent = '⏳ Генерация...';
-
-            html2canvas(cardContainer, {
-                scale: scale,
-                backgroundColor: null,
-                useCORS: true,
-                logging: false,
-                allowTaint: false
-            }).then(canvas => {
-                canvas.toBlob(function(blob) {
-                    if (blob === null) {
-                        alert('Не удалось создать изображение. Попробуйте убрать фоновое изображение.');
-                        downloadBtn.disabled = false;
-                        downloadBtn.textContent = '⬇ Скачать PNG';
-                        return;
-                    }
-                    const link = document.createElement('a');
-                    link.download = 'визитка.png';
-                    link.href = URL.createObjectURL(blob);
-                    link.click();
-                    URL.revokeObjectURL(link.href);
-                    downloadBtn.disabled = false;
-                    downloadBtn.textContent = '⬇ Скачать PNG';
-                }, 'image/png');
-            }).catch(err => {
-                console.error('Ошибка html2canvas:', err);
-                alert('Ошибка при создании изображения. Подробности в консоли (F12).');
-                downloadBtn.disabled = false;
-                downloadBtn.textContent = '⬇ Скачать PNG';
-            });
-        });
-
-        // Инициализация
-        renderCard();
-    })();
-</script>
+  </div>
 </body>
 </html>
